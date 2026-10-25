@@ -98,8 +98,9 @@ platformio.mcp / STM32_AutoDebug_Universal_Kit）：统一 ok/summary 返回契�
   环境/连接体检：MCP 调 `eat_doctor`。
 - 目标板模板：`config/targets/*.json`（stm32/esp32/ch32 示例，可自行添加），工具层
   `eat_target_profiles`/`eat_target_reset`/`eat_target_enter_bootloader`。
-- Agent Skill：`skills/eat-embedded-tool/SKILL.md` + `python tools/install_skill.py`（装到
-  Claude/Codex/ZCode/Cursor 的 skills 目录）。
+- Agent Skill：`skills/eat-embedded-tool/SKILL.md`（本工具操作规程）+
+  `python tools/install_skill.py`（装全部）或 `python tools/install_skill.py <名字>`
+  安装到 Claude/Codex/ZCode/Cursor 的 skills 目录。
 - 未完待建：JTAG/SWD 协议层（DLL 原语已绑定）、UART ISP 烧录器实现（stm32/esptool 桥接）。
 
 ## 工作纪律
