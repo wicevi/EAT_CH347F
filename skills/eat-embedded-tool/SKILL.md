@@ -84,6 +84,9 @@ eat_power_set(action="on" | "off" | "cycle")
 
 ## 注意事项
 
+- **打开串口默认释放 DTR/RTS**：CH347F 将 DTR0 复用为 GPIO2（UART0 pin1，常接目标 BOOT）、
+  RTS1 复用为 SDA（I2C 总线）——默认断言会把它们拉低。需要 DTR/RTS 复位时序时在
+  `eat_uart_config` 显式传 `dtr=True/rts=True`，且不要与被复用功能同时使用。
 - 破坏性操作（flash/EEPROM 写、擦除）先核对地址。
 - JTAG 用 GPIO3/5/6、SWD 用 GPIO4/7，与 GPIO 用途互斥。
 - 安全策略 `EAT_MCP_POLICY=full|no_write|read_only` 可限制破坏性操作。

@@ -284,12 +284,21 @@ def eat_uart_list() -> dict:
 @_tool("control", "open/configure a UART channel")
 def eat_uart_config(channel: str, baud: int = 115200,
                     databits: int = 8, parity: str = "N",
-                    stopbits: float = 1) -> dict:
-    """Open/configure a UART channel (channel='UART0'|'UART1')."""
+                    stopbits: float = 1,
+                    dtr: bool | None = None, rts: bool | None = None) -> dict:
+    """Open/configure a UART channel (channel='UART0'|'UART1').
+    dtr/rts are OFF by default when the port opens — the CH347F muxes
+    DTR0->GPIO2 (UART0 pin1, often the target BOOT strap) and
+    RTS1->SDA (the I2C bus), so asserting them would drag those nets low.
+    Only set dtr=True/rts=True deliberately for DTR/RTS reset-signalling
+    flows, and never while the muxed function is in use."""
     u = hw().uart(channel, baud=baud)
     u.configure(bytesize=databits, parity=parity, stopbits=stopbits)
-    return {"channel": channel, "port": u.port, "baud": u.ser.baudrate,
-            "format": f"{databits}{parity}{stopbits}"}
+    result = {"channel": channel, "port": u.port, "baud": u.ser.baudrate,
+              "format": f"{databits}{parity}{stopbits}"}
+    if dtr is not None or rts is not None:
+        result.update(u.set_control_lines(dtr=dtr, rts=rts))
+    return result
 
 
 @_tool("control", "send data on a UART channel")
@@ -338,7 +347,8 @@ def eat_uart_monitor_start(channel: str, baud: int = 115200,
                            ring_kb: int = 256, truncate: bool = False) -> dict:
     """Start a background monitor on a channel: every byte goes to a bounded
     ring buffer AND a timestamped log file under logs/. Use tail/grep/wait_for
-    to inspect — keeps live output out of your context window."""
+    to inspect — keeps live output out of your context window. The port is
+    opened with DTR/RTS deasserted (safe for BOOT/I2C-shared nets)."""
     u = hw().uart(channel, baud=baud)
     m = _mon.start(u, ring_bytes=ring_kb * 1024, truncate=truncate)
     return m.status()

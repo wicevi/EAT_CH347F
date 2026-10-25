@@ -50,6 +50,17 @@ platformio.mcp / STM32_AutoDebug_Universal_Kit）：统一 ok/summary 返回契�
    1kHz~60MHz 就近取档（`eat_spi_config`，实测模式3/750kHz 正常）。DLL 的
    `CH347I2C_SetDriverMode` 在当前固件/DLL 2.2 上**不支持**（调用返回失败），已在 I2CBus
    里降级为尽力而为并在返回值标注 `driver_mode_applied`；`SetStretch` 正常。
+10. **COM 口控制线与复用引脚冲突（v0.3 修复，外部项目实测踩坑）**：CH347F 的 UART MODEM
+   输出与其它功能复用，pyserial 默认 `dtr=rts=True`，`serial.Serial('COMx')` 打开即断言
+   （拉低）并**持续整个打开期**：
+   - COM16(UART0)：**DTR0 → GPIO2 网络**（UART0 连接器 pin1，外部项目接 BOOT 被拉走）
+   - COM17(UART1)：**RTS1 → SDA 网络**（pin12，拉低会拖死 I2C 总线）
+   - COM16：RTS0 → GPIO1（pin18，本板 NC）；COM17：DTR1 → SCS1（pin7，本板 NC）
+   - CTS0/CTS1 是输入方向（→VOUT_EN/SCL），打开串口不会驱动它们
+   修复：`UartChannel` 默认 `dtr=False/rts=False`，且**在 open 前设置**（pyserial 把缓存
+   状态编入 DCB，`DTR_CONTROL_DISABLE`，驱动层从头不拉线、无毛刺窗口——pyserial 源码
+   serialutil.py:216/461 + serialwin32.py:180/211 已核）。需要 DTR/RTS 复位时序时显式传参
+   （`eat_uart_config(dtr=True)` 或 `set_control_lines`），且严禁与被复用功能同时使用。
 
 ## 待办 / 待用户确认
 

@@ -111,6 +111,11 @@ Claude Code 亦可用命令行：`claude mcp add eat -- python D:\EAT_CH347F\eat
 
 ## 注意事项
 
+- **打开串口默认释放 DTR/RTS**：CH347F 将 DTR0 复用为 GPIO2（UART0 pin1，常接目标 BOOT 脚）、
+  RTS1 复用为 SDA（I2C 总线）。pyserial 默认断言 DTR/RTS 会把这些网络拉低（目标卡在
+  bootloader / I2C 失效）；本工具默认释放，需要 DTR/RTS 复位时序时在 `eat_uart_config`
+  显式指定。**用 pyserial 直接操作 COM 口的代码也请注意**：`serial.Serial('COMx')` 前先
+  `s = serial.Serial(); s.port=...; s.dtr=False; s.rts=False; s.open()`。
 - 破坏性操作（flash/EEPROM 写入、擦除）注意核对地址；当前台架 SPI flash 为 W25Q80（1MB）。
 - GPIO0 保留给 VOUT_EN（电源控制），GPIO1 板上未引出；GPIO4/7 与 SWD 复用。
 - GPIO 默认完全独立；仅当两脚被物理短接的接线下才需要互锁保护（`EAT_GPIO_PAIRS`，见 AGENTS.md）。

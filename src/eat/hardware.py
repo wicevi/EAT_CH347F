@@ -42,7 +42,10 @@ class Hardware:
         self._flash = None
 
     # -- UART ------------------------------------------------------------------
-    def uart(self, channel: str, baud: int | None = None) -> UartChannel:
+    def uart(self, channel: str, baud: int | None = None,
+             dtr: bool = False, rts: bool = False) -> UartChannel:
+        """Open (or fetch) a UART channel. Control lines default deasserted —
+        see UartChannel for the DTR0->GPIO2 / RTS1->SDA mux rationale."""
         ch = channel.upper()
         if ch not in ("UART0", "UART1"):
             raise ValueError("channel must be UART0 or UART1")
@@ -52,7 +55,7 @@ class Hardware:
                 port = coms.get(ch)
                 if not port:
                     raise RuntimeError(f"{ch} COM port not found (CH343SER?)")
-                self._uarts[ch] = UartChannel(ch, port)
+                self._uarts[ch] = UartChannel(ch, port, dtr=dtr, rts=rts)
             # bench convenience (loopback rig): open the peer too, otherwise
             # bytes in flight while its COM port is closed are dropped;
             # disabled by default in normal deployment (EAT_BENCH_UART_CROSS=1)

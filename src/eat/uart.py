@@ -11,14 +11,50 @@ class UartError(RuntimeError):
 
 
 class UartChannel:
-    """One CH347F UART channel (UART0=MI_00, UART1=MI_02)."""
+    """One CH347F UART channel (UART0=MI_00, UART1=MI_02).
+
+    Control lines default to DEASSERTED (dtr=False, rts=False) — and are set
+    BEFORE open so the driver never asserts them, not even briefly.
+
+    Why: CH347F muxes the UART modem outputs with other functions:
+        DTR0 -> GPIO2 net   (UART0 connector pin1; often a target BOOT strap)
+        RTS0 -> GPIO1       (chip pin18)
+        DTR1 -> SCS1        (chip pin7; SPI CS1)
+        RTS1 -> SDA net     (chip pin12; the I2C bus!)
+    pyserial defaults to dtr=rts=True, so a plain `serial.Serial('COMx')`
+    holds those pins low for as long as the port is open (target stuck in
+    bootloader, I2C bus dragged low). Only assert them explicitly for
+    DTR/RTS reset-signalling flows, and never while the muxed function
+    (GPIO2/SDA/...) is in use.
+    """
 
     def __init__(self, name: str, port: str, baud: int = 115200,
-                 bytesize: int = 8, parity: str = "N", stopbits: float = 1):
+                 bytesize: int = 8, parity: str = "N", stopbits: float = 1,
+                 dtr: bool = False, rts: bool = False):
         self.name, self.port = name, port
-        self.ser = serial.Serial(port, baudrate=baud, bytesize=bytesize,
-                                 parity=parity, stopbits=stopbits,
-                                 timeout=0.1, write_timeout=1.0)
+        self.ser = serial.Serial()          # no auto-open
+        self.ser.port = port
+        self.ser.baudrate = baud
+        self.ser.bytesize = bytesize
+        self.ser.parity = parity
+        self.ser.stopbits = stopbits
+        self.ser.timeout = 0.1
+        self.ser.write_timeout = 1.0
+        # cached pre-open: ends up in the DCB (DTR_CONTROL_DISABLE etc.) so
+        # the port opens with the lines already deasserted
+        self.ser.dtr = bool(dtr)
+        self.ser.rts = bool(rts)
+        self.ser.open()
+
+    def set_control_lines(self, dtr: bool | None = None,
+                          rts: bool | None = None) -> dict:
+        """Drive DTR/RTS explicitly. Asserted = pin LOW on the muxed net
+        (DTR->GPIO2 on UART0, RTS->SDA on IIC1). Use deliberately."""
+        if dtr is not None:
+            self.ser.dtr = bool(dtr)
+        if rts is not None:
+            self.ser.rts = bool(rts)
+        return {"dtr": bool(self.ser.dtr), "rts": bool(self.ser.rts)}
 
     def configure(self, baud: int = None, bytesize: int = None,
                   parity: str = None, stopbits: float = None,

@@ -48,7 +48,7 @@ GPIO 相互独立；仅回环自检（`eat_bench_selftest`，需专用接线）�
 | 工具 | 关键参数 | 说明 |
 |---|---|---|
 | `eat_uart_list` | — | `[read]` UART0/1 → COM 映射 |
-| `eat_uart_config` | channel, baud, databits, parity, stopbits | `[control]` 打开/配置（如 STM32 bootloader 需 8E1） |
+| `eat_uart_config` | channel, baud, databits, parity, stopbits, dtr?, rts? | `[control]` 打开/配置（如 STM32 bootloader 需 8E1）。**打开串口默认释放 DTR/RTS**——CH347F 将 DTR0 复用为 GPIO2（UART0 pin1，常见 BOOT 脚）、RTS1 复用为 SDA（I2C 总线），默认断言会拉低这些网络；仅 DTR/RTS 复位时序流程才显式传 `dtr=True/rts=True` |
 | `eat_uart_send` | channel, data, hex_data, newline | `[control]` 发文本或 hex |
 | `eat_uart_receive` | channel, timeout_ms, max_bytes | `[read]` 一次性读到空闲 |
 | `eat_uart_exchange` | channel, data, timeout_ms | `[control]` 发送并捕获应答（AT 式请求/响应） |
