@@ -93,5 +93,6 @@ eat_power_set(action="on" | "off" | "cycle")
 ## 排障
 
 - 任何 `ok:false` 先看 `hint`；设备类错误服务端自动重开，重试一次即可。
+- 驱动问题（COM 口消失/厂商接口打不开）：`python tools/setup_drivers.py` 先检查，缺什么装什么（需管理员）。
 - 串口收不到：核对波特率/校验位（`eat_uart_config`）；确认监视器已 start。
 - 未知 profile：`eat_target_profiles` 列表，或直接用显式 GPIO 参数。

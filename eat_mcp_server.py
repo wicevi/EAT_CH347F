@@ -89,9 +89,11 @@ def _tool(level: str = "read", summary: str | None = None):
 def _hint_for(e: Exception) -> str:
     s = str(e).lower()
     if "ch347opendevice" in s:
-        return "board unplugged? replug USB, then retry — server auto-reopens"
+        return ("vendor driver missing or board unplugged — run "
+                "python tools/setup_drivers.py to check/install CH341PAR")
     if "com port not found" in s:
-        return "CH343SER driver missing or board replugged; run eat_doctor"
+        return ("CH343SER serial driver missing? run "
+                "python tools/setup_drivers.py to check/install")
     if "no monitor running" in s:
         return "call eat_uart_monitor_start first"
     if "unknown target profile" in s:
@@ -167,14 +169,18 @@ def eat_doctor() -> dict:
     def add(name, ok, detail=""):
         checks.append({"name": name, "ok": bool(ok), "detail": str(detail)[:200]})
 
-    import winreg
+    import winreg  # noqa: F401
+    from pathlib import Path as _P
     add("python", True, sys.version.split()[0])
     try:
         import serial  # noqa
         add("pyserial", True, serial.VERSION)
     except Exception as e:
         add("pyserial", False, e)
-    add("ch347_dll", True, "CH347DLLA64.DLL (System32)")
+    dll_path = _P(r"C:\Windows\System32\CH347DLLA64.DLL")
+    add("ch347_dll", dll_path.exists(),
+        str(dll_path) if dll_path.exists()
+        else "missing — install CH341PAR (tools/setup_drivers.py --install par)")
     try:
         h = hw()
         add("device_open", h.info["chip_type"] == 2,

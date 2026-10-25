@@ -37,8 +37,13 @@ docs/                    原始资料 + 文档（见 docs/README.md、docs/MCP_T
 ## 快速开始
 
 ```bash
-pip install pyserial mcp          # 依赖（已用清华镜像验证）
-python tests/bench_selftest.py    # 硬件自检
+# 0) 驱动（先检查，缺了再装；安装器需管理员）
+python tools/setup_drivers.py              # 检查 CH343SER/CH341PAR/DLL 状态
+python tools/setup_drivers.py --install all   # 仅对缺失项弹出对应安装器
+
+# 1) 依赖 + 验证
+pip install pyserial mcp
+python tests/bench_selftest.py    # 硬件自检（需回环接线，见下）
 python tests/mcp_smoke.py         # MCP 冒烟（列工具+实测调用）
 python eat_mcp_server.py          # 以 stdio 启动 MCP server
 ```
