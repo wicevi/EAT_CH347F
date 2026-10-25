@@ -1,0 +1,14 @@
+{
+  "name": "stm32-uart0",
+  "description": "STM32 (Cortex-M) on UART0 connector: NRST=GPIO2, BOOT0=GPIO3. Flash via STM32 UART bootloader (USART1 PA9/PA10, 8E1) or use SWD on LINK1.",
+  "uart": "UART0",
+  "baud": 115200,
+  "reset_gpio": 2,
+  "reset_active": "low",
+  "reset_pulse_ms": 100,
+  "boot_gpio": 3,
+  "boot_level": 1,
+  "bootloader_baud": 115200,
+  "bootloader_format": "8E1",
+  "notes": "STM32 ROM bootloader wants even parity. For SWD flashing use LINK1 (SWDIO/SWCLK) instead of UART."
+}

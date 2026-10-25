@@ -1,0 +1,14 @@
+{
+  "name": "esp32-uart0",
+  "description": "ESP32 on UART0 connector: EN=GPIO2, IO0=GPIO3. ROM download mode needs EN pulse while IO0 high; flash with esptool through UART0 COM port.",
+  "uart": "UART0",
+  "baud": 115200,
+  "reset_gpio": 2,
+  "reset_active": "high",
+  "reset_pulse_ms": 100,
+  "boot_gpio": 3,
+  "boot_level": 1,
+  "bootloader_baud": 921600,
+  "bootloader_format": "8N1",
+  "notes": "esptool can use --before default_reset --after hard_reset with RTS/DTR only on USB-UART adapters wired to EN/IO0; here drive GPIO2/GPIO3 via this tool, then run esptool on the mapped COM port."
+}

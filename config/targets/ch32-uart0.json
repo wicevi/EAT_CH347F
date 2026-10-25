@@ -1,0 +1,14 @@
+{
+  "name": "ch32-uart0",
+  "description": "WCH CH32/CH32X series on UART0 connector: RST=GPIO2 (low active). ISP download via WCH-LinkUtility serial mode needs the chip's own bootloader pin; typically prefer LINK1 SWD or WCH-Link.",
+  "uart": "UART0",
+  "baud": 115200,
+  "reset_gpio": 2,
+  "reset_active": "low",
+  "reset_pulse_ms": 100,
+  "boot_gpio": 3,
+  "boot_level": 0,
+  "bootloader_baud": 115200,
+  "bootloader_format": "8N1",
+  "notes": "For CH32 ISP the bootloader pin is sampled at reset; pulse reset with boot asserted."
+}

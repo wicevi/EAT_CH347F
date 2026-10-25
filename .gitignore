@@ -1,0 +1,26 @@
+# runtime artifacts
+logs/
+*.log
+.probe
+
+# local agent environments (skill installed from skills/ via tools/install_skill.py)
+.zcode/
+.cursor/
+.claude/
+.codex/
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# windows
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# editor / misc
+.work/
+*.tmp
